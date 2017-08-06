@@ -2,14 +2,17 @@ import React, { Component } from 'react';
 import '../App.css';
 import { connect } from 'react-redux';
 import { addReminder, deleteReminder } from '../actions';
+import moment from 'moment';
 
 class App extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			text: ''
+			text: '',
+			dueDate: ''
 		}
 		this.handleTextChange = this.handleTextChange.bind(this);
+		this.handleDateChange = this.handleDateChange.bind(this);
 		this.addReminder = this.addReminder.bind(this);
 	}
 
@@ -22,12 +25,26 @@ class App extends Component {
 		});
 	}
 
+	handleDateChange(evt) {
+		let dueDate = evt.target.value;
+		this.setState(() => {
+			return {
+				dueDate
+			}
+		});
+	}
+
 	addReminder() {
-		this.props.addReminder(this.state.text);
+		const { text, dueDate } = this.state;
+		this.props.addReminder(text, dueDate);
 	}
 
 	deleteReminder(id) {
 		this.props.deleteReminder(id);
+	}
+
+	getFromNowDate(dueDate) {
+		return moment(new Date(dueDate)).fromNow();
 	}
 
 	renderReminders() {
@@ -38,7 +55,10 @@ class App extends Component {
 					reminders.map((reminder) => {
 						return (
 							<li key={reminder.id} className="list-group-item">
-								<div className="list-item">{reminder.text}</div>
+								<div className="list-item">
+									<div>{reminder.text}</div>
+									<div><em>{this.getFromNowDate(reminder.dueDate)}</em></div>
+								</div>
 								<div onClick={() => this.deleteReminder(reminder.id)} className="list-item delete-button">
 									&#x2715;
 								</div>
@@ -64,6 +84,12 @@ class App extends Component {
 							value={this.state.text}
 							onChange={this.handleTextChange}
 						/>
+						<input
+							className="form-control"
+							type="datetime-local"
+							value={this.state.dueDate}
+							onChange={this.handleDateChange}
+						  />
 						<button
 							type="button"
 							className="btn btn-success"
